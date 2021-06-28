@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: azure-vote-1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: azure-vote-1
+  template:
+    metadata:
+      labels:
+        app: azure-vote-1
+    spec:
+      containers:
+      - name: azure-vote-1
+        image: redis
+        ports:
+        - containerPort: 6379
+          name: redis
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: azure-vote-1
+spec:
+  ports:
+  - port: 6379
+  selector:
+    app: azure-vote-1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: azure-vote-2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: azure-vote-2
+  template:
+    metadata:
+      labels:
+        app: azure-vote-2
+    spec:
+      containers:
+      - name: azure-vote-2
+        image: microsoft/azure-vote-front:v1
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        env:
+        - name: REDIS
+          value: "azure-vote-1"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: azure-vote-1
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+  selector:
+    app: azure-vote-1
